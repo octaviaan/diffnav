@@ -1,0 +1,5 @@
+.DS_Store
+.vscode/
+reference/*.mov
+reference/*.png
+!reference/differlogo.png

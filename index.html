@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Interactive feed · UX wireframe</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #eee;
+        color: #222;
+        font:
+          16px system-ui,
+          sans-serif;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+        background: white;
+        border: 1px solid #999;
+        border-radius: 6px;
+        min-height: 44px;
+        padding: 8px 12px;
+        color: inherit;
+      }
+      button:focus-visible,
+      a:focus-visible {
+        outline: 3px solid #333;
+        outline-offset: 3px;
+      }
+      main {
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 64px;
+        padding: 28px;
+      }
+      .notes {
+        width: 260px;
+        line-height: 1.6;
+      }
+      .notes h1 {
+        font-size: 22px;
+      }
+      .notes p {
+        color: #555;
+      }
+      .notes small {
+        display: block;
+        margin-top: 32px;
+      }
+      .phone {
+        width: 390px;
+        height: min(844px, calc(100dvh - 56px));
+        min-height: 500px;
+        border: 2px solid #444;
+        background: white;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .stage {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        background: #f7f7f7;
+        overflow: hidden;
+        touch-action: none;
+      }
+      .top {
+        position: absolute;
+        top: 14px;
+        left: 16px;
+        right: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        z-index: 2;
+        font-size: 14px;
+      }
+      .tag {
+        padding: 4px 8px;
+        border: 1px dashed #aaa;
+        background: white;
+      }
+      .post {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 76px 24px 65px;
+        text-align: center;
+      }
+      .post h2 {
+        font-size: 24px;
+        margin: 0 0 8px;
+      }
+      .hint {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0 0 26px;
+      }
+      .board {
+        height: 260px;
+        width: 100%;
+        border: 1px dashed #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eee;
+        position: relative;
+      }
+      .track {
+        height: 210px;
+        width: 74px;
+        border: 1px solid #999;
+        background: white;
+        position: relative;
+        touch-action: none;
+      }
+      .knob {
+        position: absolute;
+        height: 44px;
+        left: 6px;
+        right: 6px;
+        border: 1px solid #333;
+        background: #ccc;
+        display: grid;
+        place-items: center;
+        pointer-events: none;
+      }
+      .level {
+        font-size: 36px;
+        min-width: 100px;
+        font-variant-numeric: tabular-nums;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 58px);
+        gap: 12px;
+      }
+      .cell {
+        height: 58px;
+        min-height: 58px;
+        background: white;
+      }
+      .cell.on {
+        background: #777;
+        color: white;
+      }
+      .open {
+        position: absolute;
+        inset: 0;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        z-index: 1;
+        width: 100%;
+      }
+      .open span {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        background: white;
+        border: 1px solid #555;
+        padding: 10px 20px;
+        border-radius: 6px;
+      }
+      .footer {
+        height: 60px;
+        flex: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-top: 1px solid #999;
+        background: white;
+      }
+      .footer button {
+        padding: 8px 10px;
+      }
+      .footer #app {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+      }
+      .footer #app img {
+        display: block;
+        width: 34px;
+        height: 34px;
+        object-fit: contain;
+      }
+      .footer #info {
+        flex: 1;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 14px;
+      }
+      .footer {
+        transition:
+          margin-bottom 0.3s ease,
+          transform 0.3s ease;
+      }
+      .expanded .footer {
+        margin-bottom: -60px;
+        transform: translateY(100%);
+        pointer-events: none;
+      }
+      .expanded .open {
+        display: none;
+      }
+      .expanded .board {
+        height: 350px;
+      }
+      .expanded .track {
+        height: 290px;
+      }
+      .backdrop {
+        overflow: clip;
+        opacity: 0;
+        transition: opacity 0.28s ease;
+        position: absolute;
+        inset: 0;
+        background: #0005;
+        z-index: 5;
+        display: flex;
+        align-items: flex-end;
+      }
+      .backdrop.visible {
+        opacity: 1;
+      }
+      .sheet {
+        transform: translateY(100%);
+        transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+        background: white;
+        width: 100%;
+        max-height: 80%;
+        overflow: auto;
+        padding: 20px;
+        overscroll-behavior: contain;
+      }
+      .backdrop.visible .sheet {
+        transform: translateY(0);
+      }
+      .sheet header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .sheet h2 {
+        font-size: 20px;
+        margin: 0;
+      }
+      .sheet p {
+        line-height: 1.6;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 24px;
+      }
+      .menu {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .menu button[data-nav]:not([data-nav="Search"]) {
+        aspect-ratio: 1;
+        border-radius: 20px;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        gap: 12px;
+      }
+      .menu button[data-nav]:not([data-nav="Search"]) .action-icon {
+        width: 28px;
+        height: 28px;
+      }
+      .menu button[data-nav="Search"] {
+        grid-column: 1 / -1;
+      }
+      .menu button {
+        min-height: 64px;
+        padding: 16px 20px;
+        text-align: left;
+      }
+      .menu button,
+      .actions button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .action-icon {
+        width: 20px;
+        height: 20px;
+        flex: none;
+      }
+      .actions button[aria-pressed="true"] {
+        background: #eee;
+        border-color: #444;
+      }
+      .comment-form {
+        display: grid;
+        gap: 10px;
+        margin-top: 24px;
+      }
+      .comment-form input {
+        width: 100%;
+        min-width: 0;
+        padding: 12px;
+        border: 1px solid #999;
+        border-radius: 6px;
+      }
+      .comment-form button { justify-self: end; }
+      .comments h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+        margin: 24px 0 12px;
+      }
+      .comment {
+        padding: 12px 0;
+        margin: 0;
+        border-bottom: 1px solid #ddd;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+      .notice {
+        padding: 12px;
+        background: #eee;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .toast {
+        position: absolute;
+        bottom: 80px;
+        left: 20px;
+        right: 20px;
+        padding: 12px;
+        background: #222;
+        color: white;
+        z-index: 9;
+        text-align: center;
+        font-size: 14px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @media (max-width: 700px) {
+        main {
+          padding: 0;
+          display: block;
+        }
+        .notes {
+          display: none;
+        }
+        .phone {
+          width: 100%;
+          height: 100dvh;
+          min-height: 0;
+          border: 0;
+        }
+        .footer {
+          height: calc(60px + env(safe-area-inset-bottom));
+          padding-bottom: calc(8px + env(safe-area-inset-bottom));
+        }
+      }
+      .feed {
+        position: absolute;
+        inset: 0;
+      }
+      .post {
+        position: absolute;
+        inset: 0;
+        background: #f7f7f7;
+        border-bottom: 1px solid #aaa;
+        will-change: transform;
+      }
+      .post:nth-child(even) {
+        background: #e9e9e9;
+      }
+      .board {
+        flex-shrink: 1;
+        min-height: 140px;
+      }
+      .demo-stack {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        width: 100%;
+      }
+      .demo-stack button {
+        width: 100%;
+      }
+      .big-value {
+        font-size: 56px;
+        font-variant-numeric: tabular-nums;
+      }
+      .choice.selected {
+        background: #777;
+        color: #fff;
+      }
+      .post.preview {
+        pointer-events: none;
+      }
+      .top {
+        pointer-events: none;
+      }
+      .top button {
+        pointer-events: auto;
+      }
+      .footer {
+        position: relative;
+        z-index: 3;
+      }
+      .phone.expanded .footer {
+        visibility: hidden;
+        transition:
+          margin-bottom 0.3s ease,
+          transform 0.3s ease,
+          visibility 0s 0.3s;
+      }
+      @media (max-width: 700px) {
+        .expanded .footer {
+          margin-bottom: calc(-60px - env(safe-area-inset-bottom));
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.001ms !important;
+          animation-duration: 0.001ms !important;
+        }
+      }
+      /* Floating navigation above a full-height feed. */
+      .phone .footer {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+        height: 64px;
+        margin: 0;
+        padding: 8px;
+        gap: 6px;
+        border: 1px solid #dedede;
+        border-radius: 32px;
+        background: #fff;
+        box-shadow: 0 6px 24px #00000018, 0 1px 4px #0000000a;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+      }
+      .phone .footer button {
+        min-height: 46px;
+        border: 0;
+        border-radius: 24px;
+        background: transparent;
+      }
+      .phone .footer button:hover {
+        background: #f0f0f0;
+      }
+      .phone .footer #app {
+        width: 46px;
+        flex: none;
+      }
+      .phone .footer #diff {
+        padding-inline: 16px;
+        background: #f0f0f0;
+      }
+      .phone .open span {
+        bottom: calc(98px + env(safe-area-inset-bottom, 0px));
+      }
+      .phone:not(.expanded) .post {
+        padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+      }
+      .phone.expanded .footer {
+        margin: 0;
+        opacity: 0;
+        transform: translateY(calc(100% + 28px + env(safe-area-inset-bottom, 0px)));
+        transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s;
+      }
+      button:not(.open),
+      .phone .footer button,
+      .open span {
+        border-radius: 999px;
+      }
+      .footer #info,
+      .footer #diff,
+      .phone .footer #info,
+      .phone .footer #diff {
+        background: #f0f0f0;
+      }
+      #sheetTitle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sheet-brand {
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+      }
+      .sheet.post-info header { margin-bottom: 4px; }
+      .post-author { display: block; }
+      .sheet .post-caption {
+        margin: 8px 0 0;
+        line-height: 1.45;
+      }
+      .post-info .actions {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .post-info .actions button {
+        min-width: 0;
+        padding-inline: 6px;
+        justify-content: center;
+      }
+      .post-info .comment-form { margin-top: 18px; gap: 8px; }
+      .post-info .comments h3 { margin: 18px 0 10px; }
+      .post-info .notice { margin: 0; }
+      .layout-switcher {
+        position: fixed;
+        top: calc(8px + env(safe-area-inset-top, 0px));
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: flex;
+        padding: 4px;
+        gap: 4px;
+        border: 1px solid #ddd;
+        border-radius: 999px;
+        background: white;
+      }
+      .layout-switcher a {
+        display: flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        text-decoration: none;
+        color: #333;
+        white-space: nowrap;
+      }
+      .layout-switcher a[aria-current="page"] { background: #222; color: white; }
+      @media (max-width: 700px) {
+        .layout-switcher a { min-height: 44px; }
+        .top { top: calc(76px + env(safe-area-inset-top, 0px)); }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="layout-switcher" aria-label="Layout options"><a href="index.html" aria-current="page">Variant 1</a><a href="option-2.html">Variant 2</a></nav>
+    <main>
+      <section class="phone" aria-label="Mobile app wireframe">
+        <div class="stage">
+          <div class="top"><button id="back" hidden>Back to feed</button></div>
+          <div class="feed" id="feed"></div>
+          <button class="open" id="open" aria-label="Open post to interact">
+            <span>Tap to open</span>
+          </button>
+        </div>
+        <nav class="footer" aria-label="Feed controls">
+          <button id="app" aria-label="Open app menu"><img src="reference/differlogo.png" alt="Differ" /></button><button id="info">Post info</button
+          ><button id="diff">Diff it</button>
+        </nav>
+        <div class="backdrop" id="overlay" hidden>
+          <section
+            class="sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sheetTitle"
+          >
+            <header>
+              <h2 id="sheetTitle"></h2>
+              <button id="close">Close</button>
+            </header>
+            <div id="sheetBody"></div>
+          </section>
+        </div>
+        <div class="toast" role="status" hidden></div>
+      </section>
+    </main>
+    <script>
+      const $ = (s) => document.querySelector(s);
+      const phone = $(".phone"),
+        stage = $(".stage"),
+        overlay = $("#overlay");
+      const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const posts = [
+        {
+          title: "Move the marker",
+          author: "@alex",
+          type: "marker",
+          hint: "Drag up or down to change the value.",
+          caption:
+            "A small experiment in vertical movement. Drag the marker up and down to change the value. Where will you leave it?",
+        },
+        {
+          title: "Make a pattern",
+          author: "@sam",
+          type: "grid",
+          hint: "Tap squares to make your own pattern.",
+          caption:
+            "Nine squares, your pattern. Tap any square to switch it on or off. Your pattern stays when you return.",
+        },
+        {
+          title: "Count something",
+          author: "@jo",
+          type: "counter",
+          hint: "A tiny counter for whatever you want.",
+          caption:
+            "Count steps, ideas or small wins. Add or subtract, then come back later in this session.",
+        },
+        {
+          title: "Roll a die",
+          author: "@lee",
+          type: "dice",
+          hint: "Tap to roll. What will you get?",
+          caption:
+            "A six-sided die for your next decision. Open the post and give it a roll.",
+        },
+        {
+          title: "Pick a place",
+          author: "@mia",
+          type: "choice",
+          hint: "Where would you spend an afternoon?",
+          caption:
+            "Three places, one afternoon. Choose your favourite. This is a local interaction, not a live poll.",
+        },
+        {
+          title: "Tiny checklist",
+          author: "@noa",
+          type: "checklist",
+          hint: "Take a break. Check off one small thing.",
+          caption:
+            "A short pause between posts: stretch, drink water and look away from the screen.",
+        },
+        {
+          title: "Another movement",
+          author: "@ash",
+          type: "marker",
+          hint: "Slide the marker from bottom to top.",
+          caption:
+            "Another post that uses vertical dragging. In open mode the gesture changes this post, rather than moving the feed.",
+        },
+        {
+          title: "One more pattern",
+          author: "@kit",
+          type: "grid",
+          hint: "Make a different shape this time.",
+          caption:
+            "A fresh canvas. Each post remembers its own interaction for this browsing session.",
+        },
+      ];
+      const postComments = posts.map(() => []);
+      const states = posts.map(() => ({
+        level: 50,
+        cells: Array(9).fill(false),
+        count: 0,
+        die: 1,
+        choice: -1,
+        checks: Array(3).fill(false),
+      }));
+      let current = 0,
+        expanded = false,
+        likes = posts.map(() => false),
+        saved = posts.map(() => false),
+        start = null,
+        lastSwipe = 0,
+        lastFocus,
+        animating = false,
+        settleTimer,
+        sheetTimer;
+      function demo(i) {
+        const st = states[i],
+          p = posts[i];
+        switch (p.type) {
+          case "marker":
+            return (
+              '<div class="track" role="slider" aria-label="Marker value" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' +
+              st.level +
+              '" tabindex="-1"><div class="knob">═</div></div><output class="level">' +
+              st.level +
+              "</output>"
+            );
+          case "grid":
+            return (
+              '<div class="grid">' +
+              st.cells
+                .map(
+                  (on, n) =>
+                    `<button class="cell ${on ? "on" : ""}" data-cell="${n}" aria-label="Square ${n + 1}" aria-pressed="${on}">${on ? "×" : ""}</button>`,
+                )
+                .join("") +
+              "</div>"
+            );
+          case "counter":
+            return `<div><output class="big-value">${st.count}</output><div class="actions"><button data-count="-1" aria-label="Subtract one">−</button><button data-count="1" aria-label="Add one">+</button></div></div>`;
+          case "dice":
+            return `<div><output class="big-value">${st.die}</output><p><button data-roll>Roll again</button></p></div>`;
+          case "choice":
+            return (
+              '<div class="demo-stack">' +
+              ["Mountains", "City", "Beach"]
+                .map(
+                  (v, n) =>
+                    `<button class="choice ${st.choice === n ? "selected" : ""}" data-choice="${n}" aria-pressed="${st.choice === n}">${v}</button>`,
+                )
+                .join("") +
+              "</div>"
+            );
+          case "checklist":
+            return (
+              '<div class="demo-stack">' +
+              ["Stretch", "Drink water", "Look outside"]
+                .map(
+                  (v, n) =>
+                    `<button data-check="${n}" aria-pressed="${st.checks[n]}">${st.checks[n] ? "☑" : "☐"} ${v}</button>`,
+                )
+                .join("") +
+              "</div>"
+            );
+        }
+      }
+      const wrap = (i) => ((i % posts.length) + posts.length) % posts.length;
+      function panel(i, offset) {
+        const p = posts[i];
+        return `<article class="post ${offset ? "preview" : ""}" data-offset="${offset}" style="transform:translateY(${offset * 100}%)" ${offset ? 'aria-hidden="true" inert' : ""}><h2>${p.title}</h2><p class="hint">${p.hint}</p><div class="board">${demo(i)}</div></article>`;
+      }
+      function render() {
+        phone.classList.toggle("expanded", expanded);
+        $(".footer").inert = expanded;
+        $("#back").hidden = !expanded;
+        $("#info").textContent = posts[current].author + " · Post info";
+        $("#feed").innerHTML = [-1, 0, 1]
+          .map((o) => panel(wrap(current + o), o))
+          .join("");
+        document.querySelectorAll(".post").forEach((el) => {
+          if (+el.dataset.offset === 0) el.inert = !expanded;
+        });
+        bindDemo();
+        updateMarkers();
+      }
+      function updateMarkers() {
+        document.querySelectorAll(".post").forEach((el) => {
+          const track = el.querySelector(".track");
+          if (track)
+            el.querySelector(".knob").style.bottom =
+              (states[wrap(current + +el.dataset.offset)].level / 100) *
+                (track.clientHeight - 44) +
+              "px";
+        });
+      }
+      new ResizeObserver(updateMarkers).observe(stage);
+      function bindDemo() {
+        const el = document.querySelector('.post[data-offset="0"]'),
+          st = states[current];
+        const track = el.querySelector(".track");
+        if (track) {
+          track.tabIndex = expanded ? 0 : -1;
+          const drag = (e) => {
+            const r = track.getBoundingClientRect();
+            st.level = Math.round(
+              Math.max(
+                0,
+                Math.min(
+                  100,
+                  100 - ((e.clientY - r.top - 22) / (r.height - 44)) * 100,
+                ),
+              ),
+            );
+            el.querySelector(".level").textContent = st.level;
+            track.setAttribute("aria-valuenow", st.level);
+            updateMarkers();
+          };
+          track.onpointerdown = (e) => {
+            if (expanded) {
+              track.setPointerCapture(e.pointerId);
+              drag(e);
+            }
+          };
+          track.onpointermove = (e) => {
+            if (expanded && track.hasPointerCapture(e.pointerId)) drag(e);
+          };
+          track.onkeydown = (e) => {
+            if (!["ArrowUp", "ArrowDown"].includes(e.key)) return;
+            e.preventDefault();
+            st.level = Math.max(
+              0,
+              Math.min(100, st.level + (e.key === "ArrowUp" ? 5 : -5)),
+            );
+            el.querySelector(".level").textContent = st.level;
+            track.setAttribute("aria-valuenow", st.level);
+            updateMarkers();
+          };
+        }
+        el.onclick = (e) => {
+          if (!expanded) return;
+          const b = e.target.closest("button");
+          if (!b) return;
+          if (b.dataset.cell !== undefined) {
+            const n = +b.dataset.cell;
+            st.cells[n] = !st.cells[n];
+            b.classList.toggle("on", st.cells[n]);
+            b.textContent = st.cells[n] ? "×" : "";
+            b.setAttribute("aria-pressed", st.cells[n]);
+          }
+          if (b.dataset.count) {
+            st.count += +b.dataset.count;
+            el.querySelector("output").textContent = st.count;
+          }
+          if (b.hasAttribute("data-roll")) {
+            st.die = Math.floor(Math.random() * 6) + 1;
+            el.querySelector("output").textContent = st.die;
+          }
+          if (b.dataset.choice !== undefined) {
+            st.choice = +b.dataset.choice;
+            el.querySelectorAll("[data-choice]").forEach((x) => {
+              x.classList.toggle("selected", +x.dataset.choice === st.choice);
+              x.setAttribute("aria-pressed", +x.dataset.choice === st.choice);
+            });
+          }
+          if (b.dataset.check !== undefined) {
+            const n = +b.dataset.check;
+            st.checks[n] = !st.checks[n];
+            b.setAttribute("aria-pressed", st.checks[n]);
+            b.textContent =
+              (st.checks[n] ? "☑" : "☐") +
+              " " +
+              ["Stretch", "Drink water", "Look outside"][n];
+          }
+        };
+      }
+      function positionFeed(dy, animate = false) {
+        document.querySelectorAll(".post").forEach((el) => {
+          el.style.transition =
+            animate && !reduced
+              ? "transform 320ms cubic-bezier(.22,.75,.25,1)"
+              : "none";
+          el.style.transform = `translateY(calc(${+el.dataset.offset * 100}% + ${dy}px))`;
+        });
+      }
+      function settle(direction) {
+        if (animating) return;
+        animating = true;
+        lastSwipe = Date.now();
+        positionFeed(-direction * stage.clientHeight, true);
+        clearTimeout(settleTimer);
+        settleTimer = setTimeout(
+          () => {
+            current = wrap(current + direction);
+            animating = false;
+            render();
+          },
+          reduced ? 0 : 330,
+        );
+      }
+      function browse(direction) {
+        if (expanded || !overlay.hidden || animating || start) return;
+        settle(direction);
+      }
+      function openPost() {
+        if (animating || Date.now() - lastSwipe < 400) return;
+        expanded = true;
+        render();
+        $("#back").focus();
+      }
+      function back() {
+        expanded = false;
+        render();
+        $("#open").focus();
+      }
+      $("#open").onclick = openPost;
+      $("#back").onclick = back;
+      stage.addEventListener("pointerdown", (e) => {
+        if (expanded || animating || !overlay.hidden || e.button !== 0) return;
+        start = {
+          y: e.clientY,
+          x: e.clientX,
+          t: performance.now(),
+          dy: 0,
+          id: e.pointerId,
+          moved: false,
+        };
+        $("#open").setPointerCapture(e.pointerId);
+      });
+      stage.addEventListener("pointermove", (e) => {
+        if (!start || e.pointerId !== start.id) return;
+        const dy = e.clientY - start.y,
+          dx = e.clientX - start.x;
+        if (!start.moved && Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx))
+          start.moved = true;
+        if (!start.moved) return;
+        start.dy = dy;
+        positionFeed(dy);
+      });
+      stage.addEventListener("pointerup", (e) => {
+        if (!start || e.pointerId !== start.id) return;
+        const s = start;
+        start = null;
+        if (s.moved) {
+          const velocity =
+            Math.abs(s.dy) / Math.max(1, performance.now() - s.t);
+          const commit =
+            Math.abs(s.dy) > stage.clientHeight * 0.18 ||
+            (Math.abs(s.dy) > 35 && velocity > 0.45);
+          settle(commit ? (s.dy < 0 ? 1 : -1) : 0);
+        } else if (
+          Math.abs(e.clientY - s.y) > 8 ||
+          Math.abs(e.clientX - s.x) > 8
+        )
+          lastSwipe = Date.now();
+      });
+      stage.addEventListener("pointercancel", () => {
+        if (start) {
+          start = null;
+          settle(0);
+        }
+      });
+      stage.addEventListener(
+        "wheel",
+        (e) => {
+          if (expanded || !overlay.hidden) return;
+          e.preventDefault();
+          if (Date.now() - lastSwipe > 650 && Math.abs(e.deltaY) > 12)
+            browse(e.deltaY > 0 ? 1 : -1);
+        },
+        { passive: false },
+      );
+      function sheet(title, html) {
+        $(".sheet").classList.remove("post-info");
+        clearTimeout(sheetTimer);
+        if (overlay.hidden) lastFocus = document.activeElement;
+        $("#sheetTitle").textContent = title;
+        $("#sheetBody").innerHTML = html;
+        overlay.hidden = false;
+        void overlay.offsetHeight;
+        overlay.classList.add("visible");
+        $("#close").focus({ preventScroll: true });
+      }
+      function closeSheet() {
+        overlay.classList.remove("visible");
+        clearTimeout(sheetTimer);
+        sheetTimer = setTimeout(
+          () => {
+            overlay.hidden = true;
+            lastFocus?.focus({ preventScroll: true });
+          },
+          reduced ? 0 : 280,
+        );
+      }
+      $("#close").onclick = closeSheet;
+      overlay.onclick = (e) => {
+        if (e.target === overlay) closeSheet();
+      };
+      function iconLabel(icon, label) {
+        return `<img class="action-icon" src="reference/icons/${icon}.svg" alt="" aria-hidden="true"><span>${label}</span>`;
+      }
+      $("#app").onclick = () => {
+        sheet(
+          "differ",
+          '<nav class="menu" aria-label="App navigation">' +
+            [
+              ["Search", "search"],
+              ["Feed", "feed"],
+              ["Create", "create"],
+              ["Activity", "activity"],
+              ["Profile", "profile"],
+            ]
+              .map(([label, icon]) => `<button data-nav="${label}">${icon ? iconLabel(icon, label) : label}</button>`)
+              .join("") +
+            "</nav>",
+        );
+        const brand = document.createElement("img");
+        brand.src = "reference/differlogo.png";
+        brand.alt = "";
+        brand.className = "sheet-brand";
+        $("#sheetTitle").prepend(brand);
+        document.querySelectorAll("[data-nav]").forEach(
+          (b) =>
+            (b.onclick = () => {
+              if (b.dataset.nav === "Feed") closeSheet();
+              else
+                (sheet(
+                  b.dataset.nav,
+                  `<p class="notice">${b.dataset.nav} destination placeholder. This wireframe focuses on browsing and interacting with posts.</p><button id="returnFeed">Return to feed</button>`,
+                ),
+                  $("#returnFeed") && ($("#returnFeed").onclick = closeSheet));
+            }),
+        );
+      };
+      $("#info").onclick = () => {
+        const p = posts[current];
+        sheet(
+          p.title,
+          `<b class="post-author">${p.author}</b><p class="post-caption">${p.caption}</p><div class="actions"><button id="like" aria-pressed="${likes[current]}">${iconLabel("like", likes[current] ? "Liked" : "Like")}</button><button id="save" aria-pressed="${saved[current]}">${iconLabel("save", saved[current] ? "Saved" : "Save")}</button><button id="share">${iconLabel("share", "Share")}</button></div><form id="commentForm" class="comment-form"><label for="comment">Add a comment</label><input id="comment" required placeholder="Write a comment…"><button type="submit">Post comment</button></form><section class="comments" aria-labelledby="commentsTitle"><h3 id="commentsTitle">${iconLabel("comments", "Comments")}</h3><div id="commentList" aria-live="polite"></div></section>`,
+        );
+        $(".sheet").classList.add("post-info");
+        $("#like").onclick = (e) => {
+          likes[current] = !likes[current];
+          e.currentTarget.querySelector("span").textContent = likes[current] ? "Liked" : "Like";
+          e.currentTarget.setAttribute("aria-pressed", likes[current]);
+        };
+        $("#save").onclick = (e) => {
+          saved[current] = !saved[current];
+          e.currentTarget.querySelector("span").textContent = saved[current] ? "Saved" : "Save";
+          e.currentTarget.setAttribute("aria-pressed", saved[current]);
+        };
+        const comments = postComments[current];
+        function renderComments() {
+          const list = $("#commentList");
+          list.replaceChildren();
+          if (!comments.length) {
+            const empty = document.createElement("p");
+            empty.className = "notice";
+            empty.textContent = "No comments yet. Be the first to comment.";
+            list.append(empty);
+          }
+          comments.forEach((text) => {
+            const comment = document.createElement("p");
+            comment.className = "comment";
+            comment.textContent = text;
+            list.append(comment);
+          });
+        }
+        renderComments();
+        $("#commentForm").onsubmit = (e) => {
+          e.preventDefault();
+          const input = $("#comment");
+          const text = input.value.trim();
+          if (!text) {
+            input.value = "";
+            input.reportValidity();
+            return;
+          }
+          comments.push(text);
+          input.value = "";
+          renderComments();
+        };
+        $("#share").onclick = () => toast("Share flow placeholder");
+      };
+      $("#diff").onclick = () =>
+        sheet(
+          "Diff it",
+          `<p>Create your own version of <b>${posts[current].title}</b>.</p><p class="notice">Editor entry point only. Creation is outside this first wireframe.</p>`,
+        );
+      let toastTimer;
+      function toast(t) {
+        clearTimeout(toastTimer);
+        $(".toast").textContent = t;
+        $(".toast").hidden = false;
+        toastTimer = setTimeout(() => ($(".toast").hidden = true), 1800);
+      }
+      document.addEventListener("keydown", (e) => {
+        if (!overlay.hidden) {
+          if (e.key === "Escape") closeSheet();
+          if (e.key === "Tab") {
+            const els = [...overlay.querySelectorAll("button,input")],
+              first = els[0],
+              last = els.at(-1);
+            if (e.shiftKey && document.activeElement === first) {
+              e.preventDefault();
+              last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
+          return;
+        }
+        if (e.key === "Escape" && expanded) back();
+        if (!expanded && ["ArrowDown", "ArrowUp"].includes(e.key)) {
+          e.preventDefault();
+          browse(e.key === "ArrowDown" ? 1 : -1);
+        }
+      });
+      render();
+    </script>
+  </body>
+</html>
